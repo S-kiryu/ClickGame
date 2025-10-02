@@ -3,11 +3,11 @@ using UnityEngine.UI;
 
 public class ConsecutiveHits : MonoBehaviour
 {
-    // Constants
+    //ランダム１～１００まで
     private const int MIN_RANDOM = 1;
     private const int MAX_RANDOM = 101;
 
-    // Level System
+    // レベルステート
     [Header("Level System")]
     [SerializeField] private int _level = 1;
     [SerializeField] private float _levelUpExp = 10f;
@@ -15,7 +15,7 @@ public class ConsecutiveHits : MonoBehaviour
     [SerializeField] private float _baseExpGain = 1f;
     private float _currentExp = 0;
 
-    // Combat Stats
+    // クリティカルと渾身
     [Header("Combat Rates (%)")]
     [Tooltip("クリティカル率")]
     [SerializeField] private int _criticalRate = 1;
@@ -42,7 +42,7 @@ public class ConsecutiveHits : MonoBehaviour
         HandleInput();
     }
 
-    #region Input Handling
+    #region スペースが押されているかの確認
     private void HandleInput()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -54,7 +54,7 @@ public class ConsecutiveHits : MonoBehaviour
     }
     #endregion
 
-    #region Experience System
+    #region もらえるXPを管理
     private void AddExperience()
     {
         float multiplier = 1f;
@@ -86,7 +86,7 @@ public class ConsecutiveHits : MonoBehaviour
     }
     #endregion
 
-    #region Level System
+    #region レベルUpできるかの確認
     private void CheckLevelUp()
     {
         if (_currentExp >= _levelUpExp)
@@ -100,7 +100,7 @@ public class ConsecutiveHits : MonoBehaviour
     }
     #endregion
 
-    #region UI
+    #region UIを更新
     private void UpdateUI()
     {
         if (_statusText != null)
@@ -110,7 +110,7 @@ public class ConsecutiveHits : MonoBehaviour
     }
     #endregion
 
-    #region Helper Methods
+    #region １～１００の数字を判定
     /// <summary>
     /// 指定された確率で成功判定を行う
     /// </summary>
