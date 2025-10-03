@@ -96,6 +96,7 @@ public class ConsecutiveHits : MonoBehaviour
             _levelUpExp *= _expIncreaseRate;
 
             Debug.Log($"レベルアップ！ Lv.{_level}");
+            Items.CoinUp();
         }
     }
     #endregion
