@@ -4,6 +4,7 @@ using UnityEngine;
 public class Items : MonoBehaviour
 {
     [SerializeField] static private int _coin = 0;
+    //アイテムデータを
     public List<ItemData> ownedItems = new List<ItemData>();
 
     public bool CanAfford(int price) => _coin >= price;
