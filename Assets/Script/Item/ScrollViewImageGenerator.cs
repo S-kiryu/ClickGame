@@ -55,6 +55,18 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
     private void GenerateItems()
     {
 
+        if (shopInventory == null)
+        {
+            Debug.LogError("shopInventory が Inspector に設定されていません！");
+            return;
+        }
+
+        if (shopInventory.items == null)
+        {
+            Debug.LogError("shopInventory.items が初期化されていません！");
+            return;
+        }
+
         Debug.Log($"アイテム数: {shopInventory.items.Count}");
 
         Transform content = _scrollRect.content;
@@ -79,6 +91,12 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
 
             // LayoutElement 設定
             LayoutElement layoutElement = itemObj.GetComponent<LayoutElement>();
+            if (layoutElement == null)
+            {
+                layoutElement = itemObj.AddComponent<LayoutElement>();
+            }
+            Debug.Log(layoutElement.preferredHeight);
+            Debug.Log(layoutElement.preferredWidth);
             layoutElement.preferredHeight = itemSize.y;
             layoutElement.preferredWidth = itemSize.x;
         }
