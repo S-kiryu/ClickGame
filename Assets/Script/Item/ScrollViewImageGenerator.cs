@@ -55,31 +55,11 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
     private void GenerateItems()
     {
 
-        if (shopInventory == null)
-        {
-            Debug.LogError("shopInventory が Inspector に設定されていません！");
-            return;
-        }
-
-        if (shopInventory.items == null)
-        {
-            Debug.LogError("shopInventory.items が初期化されていません！");
-            return;
-        }
-
-        Debug.Log($"アイテム数: {shopInventory.items.Count}");
-
         Transform content = _scrollRect.content;
 
         for (int i = 0; i < shopInventory.items.Count; i++)
         {
             ItemData item = shopInventory.items[i];
-
-            if (item == null)
-            {
-                Debug.LogWarning($"Item {i} が null です");
-                continue;
-            }
 
             // アイテム表示用のオブジェクトを生成
             GameObject itemObj = CreateItemUI(item, i);
@@ -91,12 +71,12 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
 
             // LayoutElement 設定
             LayoutElement layoutElement = itemObj.GetComponent<LayoutElement>();
+
+            //layoutElementがないときに取得する
             if (layoutElement == null)
             {
                 layoutElement = itemObj.AddComponent<LayoutElement>();
             }
-            Debug.Log(layoutElement.preferredHeight);
-            Debug.Log(layoutElement.preferredWidth);
             layoutElement.preferredHeight = itemSize.y;
             layoutElement.preferredWidth = itemSize.x;
         }
@@ -110,13 +90,10 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
             _scrollRect.verticalNormalizedPosition = 1f;
             Debug.Log("スクロール位置を設定しました");
         }
-
-        Debug.Log("GenerateItems 完了");
     }
 
     private GameObject CreateItemUI(ItemData item, int index)
     {
-        Debug.Log($"CreateItemUI 開始: Item {index}");
 
         // ベースとなるパネル
         GameObject itemObj = new GameObject("Item_" + index, typeof(RectTransform));
@@ -125,7 +102,6 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
         Image bgImage = itemObj.AddComponent<Image>();
         bgImage.color = new Color(0.95f, 0.95f, 0.95f, 1f);
 
-        Debug.Log($"アイコン取得中...");
         Sprite icon = item.GetIcon();
 
         // アイコン画像
@@ -140,8 +116,8 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("アイコンがnullです");
-            iconImage.color = Color.gray; // アイコンがない場合はグレー表示
+            Debug.LogWarning("アイコンがないよー");
+            iconImage.color = Color.gray;
         }
 
         RectTransform iconRect = iconObj.GetComponent<RectTransform>();
@@ -151,54 +127,10 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
         iconRect.anchoredPosition = new Vector2(10, 0);
         iconRect.sizeDelta = new Vector2(80, 80);
 
-        Debug.Log($"テキスト情報取得中...");
-
         string itemName = "";
         string description = "";
         int price = 0;
         int itemLv = 0;
-
-        try
-        {
-            itemName = item.GetItemName();
-            Debug.Log($"itemName取得成功: {itemName}");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"GetItemName()でエラー: {e.Message}");
-            itemName = "エラー";
-        }
-
-        try
-        {
-            description = item.GetDescription();
-            Debug.Log($"description取得成功: {description}");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"GetDescription()でエラー: {e.Message}");
-            description = "エラー";
-        }
-
-        try
-        {
-            price = item.GetPrice();
-            Debug.Log($"price取得成功: {price}");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"GetPrice()でエラー: {e.Message}");
-        }
-
-        try
-        {
-            itemLv = item.GetItemLv();
-            Debug.Log($"itemLv取得成功: {itemLv}");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"GetItemLv()でエラー: {e.Message}");
-        }
 
         // テキスト情報エリア
         GameObject textArea = new GameObject("TextArea", typeof(RectTransform));
