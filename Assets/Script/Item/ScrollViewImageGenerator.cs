@@ -1,15 +1,27 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 public class ItemDataScrollViewGenerator : MonoBehaviour
 {
     [SerializeField] private ScrollRect _scrollRect;
-    [SerializeField] private ShopInventory shopInventory;  // ShopInventory‚ğg—p
+    [SerializeField] private ShopInventory shopInventory;
     [SerializeField] private Vector2 itemSize = new Vector2(300, 120);
     [SerializeField] private float spacing = 10f;
 
     private void Start()
     {
+        if (_scrollRect == null)
+        {
+            Debug.LogError("ScrollRect ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“!");
+            return;
+        }
+
+        if (shopInventory == null || shopInventory.items == null)
+        {
+            Debug.LogError("ShopInventory ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“!");
+            return;
+        }
+
         SetupContent();
         GenerateItems();
     }
@@ -18,97 +30,98 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
     {
         Transform content = _scrollRect.content;
 
-        // c•À‚ÑƒŒƒCƒAƒEƒg
-        VerticalLayoutGroup layoutGroup = content.GetComponent<VerticalLayoutGroup>();
-        if (layoutGroup == null)
-        {
-            layoutGroup = content.gameObject.AddComponent<VerticalLayoutGroup>();
-        }
+        // æ—¢å­˜ã®LayoutGroupã¨SizeFitterã‚’ã‚¯ãƒªã‚¢
+        VerticalLayoutGroup existingLayout = content.GetComponent<VerticalLayoutGroup>();
+        if (existingLayout != null) Destroy(existingLayout);
 
-        //ƒCƒ[ƒW‚ÌŠÔŠu
+        ContentSizeFitter existingFitter = content.GetComponent<ContentSizeFitter>();
+        if (existingFitter != null) Destroy(existingFitter);
+
+        // ç¸¦ä¸¦ã³ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
+        VerticalLayoutGroup layoutGroup = content.gameObject.AddComponent<VerticalLayoutGroup>();
         layoutGroup.spacing = spacing;
-        //ã’†‰›‚ÉŠñ‚¹‚é
         layoutGroup.childAlignment = TextAnchor.UpperCenter;
-        //‰æ‘œ‚ª‰¡•‚É‡‚í‚¹‚ÄL‚Ñ‚é‚©‚Ç‚¤‚©
-        layoutGroup.childControlWidth = true;
-        //‚‚³‚ğ©“®“I‚Éİ’è‚·‚é‚©‚Ç‚¤‚©
+        layoutGroup.childControlWidth = false;
         layoutGroup.childControlHeight = false;
-        //‰¡‚ğ‹­§“I‚ÉL‚°‚é‚©
         layoutGroup.childForceExpandWidth = false;
-        //c‚ÉL‚°‚é‚©
         layoutGroup.childForceExpandHeight = false;
-        //¶‰Eã‰º‚É—]”’‚ğ‚Ç‚Ì‚­‚ç‚¢ì‚é‚©(left, right, top, bottom)
         layoutGroup.padding = new RectOffset(10, 10, 10, 10);
 
-        // ContentSizeFitter ‚Å‚‚³‚ğ©“®’²®
-        ContentSizeFitter sizeFitter = content.GetComponent<ContentSizeFitter>();
-        if (sizeFitter == null)
-        {
-            sizeFitter = content.gameObject.AddComponent<ContentSizeFitter>();
-        }
-        //c‚Ì©“®’²®
+        // ContentSizeFitter ã§é«˜ã•ã‚’è‡ªå‹•èª¿æ•´
+        ContentSizeFitter sizeFitter = content.gameObject.AddComponent<ContentSizeFitter>();
         sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        //“®‚©‚³‚È‚¢
         sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
     }
 
     private void GenerateItems()
     {
-
         Transform content = _scrollRect.content;
+
+        // æ—¢å­˜ã®å­è¦ç´ ã‚’å‰Šé™¤
+        foreach (Transform child in content)
+        {
+            Destroy(child.gameObject);
+        }
 
         for (int i = 0; i < shopInventory.items.Count; i++)
         {
             ItemData item = shopInventory.items[i];
+            if (item == null)
+            {
+                Debug.LogWarning($"Item {i} ãŒ null ã§ã™");
+                continue;
+            }
 
-            // ƒAƒCƒeƒ€•\¦—p‚ÌƒIƒuƒWƒFƒNƒg‚ğ¶¬
+            // ã‚¢ã‚¤ãƒ†ãƒ è¡¨ç¤ºç”¨ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
             GameObject itemObj = CreateItemUI(item, i);
             itemObj.transform.SetParent(content, false);
 
-            // RectTransform İ’è
-            RectTransform rectTransform = itemObj.GetComponent<RectTransform>();
-            rectTransform.sizeDelta = itemSize;
-
-            // LayoutElement İ’è
-            LayoutElement layoutElement = itemObj.GetComponent<LayoutElement>();
-
-            //layoutElement‚ª‚È‚¢‚Æ‚«‚Éæ“¾‚·‚é
-            if (layoutElement == null)
-            {
-                layoutElement = itemObj.AddComponent<LayoutElement>();
-            }
-            layoutElement.preferredHeight = itemSize.y;
+            // LayoutElement è¨­å®š
+            LayoutElement layoutElement = itemObj.AddComponent<LayoutElement>();
+            layoutElement.minWidth = itemSize.x;
+            layoutElement.minHeight = itemSize.y;
             layoutElement.preferredWidth = itemSize.x;
+            layoutElement.preferredHeight = itemSize.y;
         }
 
-        // ƒŒƒCƒAƒEƒg‚ğ‹­§“I‚ÉXV
+        // ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’å¼·åˆ¶çš„ã«æ›´æ–°
+        LayoutRebuilder.ForceRebuildLayoutImmediate(content as RectTransform);
         Canvas.ForceUpdateCanvases();
 
-        // ˆê”Ôã‚©‚ç•\¦ŠJn
-        if (_scrollRect != null)
-        {
-            _scrollRect.verticalNormalizedPosition = 1f;
-            Debug.Log("ƒXƒNƒ[ƒ‹ˆÊ’u‚ğİ’è‚µ‚Ü‚µ‚½");
-        }
+        // ä¸€ç•ªä¸Šã‹ã‚‰è¡¨ç¤ºé–‹å§‹
+        _scrollRect.verticalNormalizedPosition = 1f;
     }
 
     private GameObject CreateItemUI(ItemData item, int index)
     {
-
-        // ƒx[ƒX‚Æ‚È‚éƒpƒlƒ‹
-        GameObject itemObj = new GameObject("Item_" + index, typeof(RectTransform));
-        RectTransform itemRect = itemObj.GetComponent<RectTransform>();
-
-        Image bgImage = itemObj.AddComponent<Image>();
-        bgImage.color = new Color(0.95f, 0.95f, 0.95f, 1f);
-
+        // ãƒ‡ãƒ¼ã‚¿å–å¾—
+        string itemName = item.GetItemName();
+        string description = item.GetDescription();
+        int price = item.GetPrice();
+        int itemLv = item.GetItemLv();
         Sprite icon = item.GetIcon();
 
-        // ƒAƒCƒRƒ“‰æ‘œ
-        GameObject iconObj = new GameObject("Icon", typeof(RectTransform));
-        iconObj.transform.SetParent(itemObj.transform, false);
-        Image iconImage = iconObj.AddComponent<Image>();
+        // ãƒ™ãƒ¼ã‚¹ã¨ãªã‚‹ãƒ‘ãƒãƒ«
+        GameObject itemObj = new GameObject("Item_" + index);
+        RectTransform itemRect = itemObj.AddComponent<RectTransform>();
+        itemRect.sizeDelta = itemSize;
 
+        // èƒŒæ™¯
+        Image bgImage = itemObj.AddComponent<Image>();
+        bgImage.color = new Color(0.9f, 0.9f, 0.9f, 1f);
+
+        // ã‚¢ã‚¤ã‚³ãƒ³ç”»åƒ
+        GameObject iconObj = new GameObject("Icon");
+        RectTransform iconRect = iconObj.AddComponent<RectTransform>();
+        iconObj.transform.SetParent(itemObj.transform, false);
+
+        iconRect.anchorMin = new Vector2(0, 0.5f);
+        iconRect.anchorMax = new Vector2(0, 0.5f);
+        iconRect.pivot = new Vector2(0, 0.5f);
+        iconRect.anchoredPosition = new Vector2(10, 0);
+        iconRect.sizeDelta = new Vector2(80, 80);
+
+        Image iconImage = iconObj.AddComponent<Image>();
         if (icon != null)
         {
             iconImage.sprite = icon;
@@ -116,90 +129,71 @@ public class ItemDataScrollViewGenerator : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("ƒAƒCƒRƒ“‚ª‚È‚¢‚æ[");
             iconImage.color = Color.gray;
         }
 
-        RectTransform iconRect = iconObj.GetComponent<RectTransform>();
-        iconRect.anchorMin = new Vector2(0, 0.5f);
-        iconRect.anchorMax = new Vector2(0, 0.5f);
-        iconRect.pivot = new Vector2(0, 0.5f);
-        iconRect.anchoredPosition = new Vector2(10, 0);
-        iconRect.sizeDelta = new Vector2(80, 80);
-
-        string itemName = "";
-        string description = "";
-        int price = 0;
-        int itemLv = 0;
-
-        // ƒeƒLƒXƒgî•ñƒGƒŠƒA
-        GameObject textArea = new GameObject("TextArea", typeof(RectTransform));
-        textArea.transform.SetParent(itemObj.transform, false);
-        RectTransform textRect = textArea.GetComponent<RectTransform>();
-        textRect.anchorMin = new Vector2(0, 0);
-        textRect.anchorMax = new Vector2(1, 1);
-        textRect.offsetMin = new Vector2(100, 10);
-        textRect.offsetMax = new Vector2(-10, -10);
-
-        // ƒAƒCƒeƒ€–¼iã•”j
-        GameObject nameObj = new GameObject("Name", typeof(RectTransform));
-        nameObj.transform.SetParent(textArea.transform, false);
-        Text nameText = nameObj.AddComponent<Text>();
-        nameText.text = itemName;
-
+        // ãƒ•ã‚©ãƒ³ãƒˆå–å¾—
         Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (font == null)
         {
             font = Font.CreateDynamicFontFromOSFont("Arial", 14);
         }
+
+        // ã‚¢ã‚¤ãƒ†ãƒ å
+        GameObject nameObj = new GameObject("Name");
+        RectTransform nameRect = nameObj.AddComponent<RectTransform>();
+        nameObj.transform.SetParent(itemObj.transform, false);
+
+        nameRect.anchorMin = new Vector2(0, 1);
+        nameRect.anchorMax = new Vector2(1, 1);
+        nameRect.pivot = new Vector2(0, 1);
+        nameRect.anchoredPosition = new Vector2(100, -10);
+        nameRect.sizeDelta = new Vector2(-110, 30);
+
+        Text nameText = nameObj.AddComponent<Text>();
+        nameText.text = itemName;
         nameText.font = font;
         nameText.fontSize = 16;
         nameText.fontStyle = FontStyle.Bold;
         nameText.color = Color.black;
-        nameText.alignment = TextAnchor.UpperLeft;
+        nameText.alignment = TextAnchor.MiddleLeft;
 
-        RectTransform nameRect = nameObj.GetComponent<RectTransform>();
-        nameRect.anchorMin = new Vector2(0, 1);
-        nameRect.anchorMax = new Vector2(1, 1);
-        nameRect.pivot = new Vector2(0, 1);
-        nameRect.anchoredPosition = new Vector2(0, 0);
-        nameRect.sizeDelta = new Vector2(0, 25);
+        // èª¬æ˜
+        GameObject descObj = new GameObject("Description");
+        RectTransform descRect = descObj.AddComponent<RectTransform>();
+        descObj.transform.SetParent(itemObj.transform, false);
 
-        // à–¾i’†‰›j
-        GameObject descObj = new GameObject("Description", typeof(RectTransform));
-        descObj.transform.SetParent(textArea.transform, false);
+        descRect.anchorMin = new Vector2(0, 0.5f);
+        descRect.anchorMax = new Vector2(1, 0.5f);
+        descRect.pivot = new Vector2(0, 0.5f);
+        descRect.anchoredPosition = new Vector2(100, 0);
+        descRect.sizeDelta = new Vector2(-110, 40);
+
         Text descText = descObj.AddComponent<Text>();
         descText.text = description;
         descText.font = font;
-        descText.fontSize = 12;
+        descText.fontSize = 11;
         descText.color = new Color(0.3f, 0.3f, 0.3f);
         descText.alignment = TextAnchor.UpperLeft;
 
-        RectTransform descRect = descObj.GetComponent<RectTransform>();
-        descRect.anchorMin = new Vector2(0, 0);
-        descRect.anchorMax = new Vector2(1, 1);
-        descRect.offsetMin = new Vector2(0, 25);
-        descRect.offsetMax = new Vector2(0, -25);
+        // ä¾¡æ ¼ã¨ãƒ¬ãƒ™ãƒ«
+        GameObject priceObj = new GameObject("PriceLevel");
+        RectTransform priceRect = priceObj.AddComponent<RectTransform>();
+        priceObj.transform.SetParent(itemObj.transform, false);
 
-        // ‰¿Ši‚ÆƒŒƒxƒ‹i‰º•”j
-        GameObject priceObj = new GameObject("PriceLevel", typeof(RectTransform));
-        priceObj.transform.SetParent(textArea.transform, false);
-        Text priceText = priceObj.AddComponent<Text>();
-        string priceLevel = $"‰¿Ši: {price}G  Lv: {itemLv}";
-        priceText.text = priceLevel;
-        priceText.font = font;
-        priceText.fontSize = 14;
-        priceText.color = new Color(0.2f, 0.5f, 0.8f);
-        priceText.alignment = TextAnchor.LowerLeft;
-
-        RectTransform priceRect = priceObj.GetComponent<RectTransform>();
         priceRect.anchorMin = new Vector2(0, 0);
         priceRect.anchorMax = new Vector2(1, 0);
         priceRect.pivot = new Vector2(0, 0);
-        priceRect.anchoredPosition = new Vector2(0, 0);
-        priceRect.sizeDelta = new Vector2(0, 25);
+        priceRect.anchoredPosition = new Vector2(100, 5);  // 10 â†’ 5 ã«å¤‰æ›´ï¼ˆä¸‹ã®ä½™ç™½ã‚’æ¸›ã‚‰ã™ï¼‰
+        priceRect.sizeDelta = new Vector2(-110, 30);  // 25 â†’ 30 ã«å¤‰æ›´ï¼ˆé«˜ã•ã‚’å¢—ã‚„ã™ï¼‰
 
-        Debug.Log($"CreateItemUI Š®—¹: Item {index}");
+        Text priceText = priceObj.AddComponent<Text>();
+        priceText.text = $"ä¾¡æ ¼: {price}G  Lv: {itemLv}";
+        priceText.font = font;
+        priceText.fontSize = 13;
+        priceText.color = new Color(0.2f, 0.5f, 0.8f);
+        priceText.alignment = TextAnchor.MiddleLeft;  // ã¾ãŸã¯ TextAnchor.LowerLeft ã§ã‚‚OK
+
         return itemObj;
     }
 }
