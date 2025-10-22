@@ -2,7 +2,14 @@ using UnityEngine;
 
 public class OnOfCS : MonoBehaviour
 {
-    public static void  OnOf(GameObject gameObject) 
+    [SerializeField]private GameObject _gameObject;
+
+    public void ButtonOnOf() 
+    {
+        OnOf(_gameObject);
+    }
+
+    public static void  OnOf(GameObject gameObject)
     {
         if (gameObject.activeSelf == false)
         {
@@ -13,7 +20,6 @@ public class OnOfCS : MonoBehaviour
         {
             gameObject.SetActive(false);
             Debug.Log("è¡Ç¶ÇΩ");
-        }
-        
+        }  
     }
 }
