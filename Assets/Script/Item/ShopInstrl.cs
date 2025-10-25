@@ -1,7 +1,16 @@
-using System.Data;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class ShopInstrl : MonoBehaviour
+public class ButtonCreator : MonoBehaviour
 {
-    [SerializeField] private ShopInventory inventory;
+    [SerializeField] private ScrollRect scrollRect;
+    [SerializeField] private Button buttonPrefab;
+
+    void Start()
+    {
+        // É{É^ÉìÇê∂ê¨
+        Button newButton = Instantiate(buttonPrefab);
+        //Canvas ÇÃéqÇ…Ç∑ÇÈ
+        newButton.transform.SetParent(scrollRect.content, false);
+    }
 }
