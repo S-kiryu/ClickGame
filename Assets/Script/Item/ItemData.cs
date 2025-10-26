@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "ScriptableObjects/ItemData", order = 1)]
 public class ItemData : ScriptableObject
@@ -12,6 +13,9 @@ public class ItemData : ScriptableObject
     [SerializeField] private int price;
     [Tooltip("アイテムのレベル")]
     [SerializeField] private int itemLv;
+    [Header("アクション設定")]
+    [Tooltip("このアイテムがクリックされた時に実行されるスクリプト")]
+    [SerializeField] private ItemAction itemAction;
 
     // ゲッターメソッド
     public string GetItemName()
@@ -37,5 +41,13 @@ public class ItemData : ScriptableObject
     public int GetItemLv()
     {
         return itemLv;
+    }
+
+    public void ExecuteAction()
+    {
+        if (itemAction != null)
+        {
+            itemAction.Execute(this);
+        }
     }
 }
