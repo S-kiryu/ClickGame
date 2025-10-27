@@ -18,9 +18,9 @@ public class ConsecutiveHits : MonoBehaviour
     // クリティカルと渾身
     [Header("Combat Rates (%)")]
     [Tooltip("クリティカル率")]
-    [SerializeField] private int _criticalRate = 1;
+    [SerializeField] private float _criticalRate = 1;
     [Tooltip("渾身率")]
-    [SerializeField] private int _powerfulRate = 1;
+    [SerializeField] private float _powerfulRate = 1;
 
     [Header("Damage Multipliers")]
     [Tooltip("クリティカルダメージ")]
@@ -117,7 +117,7 @@ public class ConsecutiveHits : MonoBehaviour
     /// </summary>
     /// <param name="rate">成功率（1-100）</param>
     /// <returns>成功した場合true</returns>
-    private bool CheckRate(int rate)
+    private bool CheckRate(float rate)
     {
         int value = Random.Range(MIN_RANDOM, MAX_RANDOM);
         return rate >= value;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,7 +16,7 @@ public class ItemData : ScriptableObject
     [SerializeField] private int itemLv;
     [Header("アクション設定")]
     [Tooltip("このアイテムがクリックされた時に実行されるスクリプト")]
-    [SerializeField] private ItemAction itemAction;
+    [SerializeField] private List<ItemAction> itemActions = new List<ItemAction>();
 
     // ゲッターメソッド
     public string GetItemName()
@@ -45,9 +46,15 @@ public class ItemData : ScriptableObject
 
     public void ExecuteAction()
     {
-        if (itemAction != null)
+        if (itemActions != null && itemActions.Count > 0)
         {
-            itemAction.Execute(this);
+            foreach (var action in itemActions)
+            {
+                if (action != null)
+                {
+                    action.Execute(this);
+                }
+            }
         }
     }
 }
