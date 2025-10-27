@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,6 +34,23 @@ public class ConsecutiveHits : MonoBehaviour
     [Header("UI")]
     [SerializeField] private Text _statusText;
 
+    //ステータス変更用Dictionary
+    private Dictionary<string, Action<float>> _statModifiers;
+
+    //Awakeメソッド
+    //_consecutiveHits.ModifyStat("欲しいステータスの名前", 値);
+    public void Awake()
+    {
+        _statModifiers = new Dictionary<string, Action<float>>()
+        {
+            { "BaseExpGain", value => _baseExpGain += value },
+            { "CriticalRate", value => _criticalRate += value },
+            { "CriticalDamage", value => _criticalDamage += value },
+            { "PowerfulRate", value => _powerfulRate += value },
+            { "PowerfulDamage", value => _powerfulDamage += value }
+        };
+    }
+
     private void Start()
     {
         UpdateUI();
@@ -65,7 +84,6 @@ public class ConsecutiveHits : MonoBehaviour
         if (isCritical) multiplier *= _criticalDamage;
 
         LogCombatResult(isPowerful, isCritical);
-
         _currentExp += _baseExpGain * multiplier;
     }
 
@@ -94,7 +112,6 @@ public class ConsecutiveHits : MonoBehaviour
             _level++;
             _currentExp -= _levelUpExp;
             _levelUpExp *= _expIncreaseRate;
-
             Debug.Log($"レベルアップ！ Lv.{_level}");
             Items.CoinUp();
         }
@@ -119,8 +136,29 @@ public class ConsecutiveHits : MonoBehaviour
     /// <returns>成功した場合true</returns>
     private bool CheckRate(float rate)
     {
-        int value = Random.Range(MIN_RANDOM, MAX_RANDOM);
+        int value = UnityEngine.Random.Range(MIN_RANDOM, MAX_RANDOM);
         return rate >= value;
+    }
+
+    #endregion
+
+    #region ステータス変更
+    /// <summary>
+    /// 指定されたステータスを変更する
+    /// </summary>
+    /// <param name="statName">ステータス名（BaseExpGain, CriticalRate, CriticalDamage, PowerfulRate, PowerfulDamage）</param>
+    /// <param name="value">変更量</param>
+    public void ModifyStat(string statName, float value)
+    {
+        if (_statModifiers.ContainsKey(statName))
+        {
+            _statModifiers[statName](value);
+            Debug.Log($"{statName}を{value}変更しました");
+        }
+        else
+        {
+            Debug.LogWarning($"存在しないステータス名です: {statName}");
+        }
     }
     #endregion
 }
